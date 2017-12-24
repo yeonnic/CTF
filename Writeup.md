@@ -285,7 +285,7 @@ location.href="404";
 
 asd.php를 받으면 js가 난독화되어있다;;
 
-난독화해제 개꿀 사이트인 http://jsbeautifier.org/ 에서 해제하면
+난독화해제 개꿀 사이트인 http://jsbeautifier.org/ 에서 해제한 다음 코드를 다듬어서 플래그를 띄웠다.
 
 ```js
 var b = 200;
@@ -326,3 +326,9 @@ for (a = 0; a <= 20; a++) {
     alert(String.fromCharCode(b))
 }
 ```
+```js
+var asd="";
+var b=200;for(a=0;a<=20;a++){b=b+((a*b)-(a/b));if(a==0)b=70;else if(a==1)b=76;else if(a==3)b=71;else if(a==2)b=65;else if(a==4)b=123;else if(a==20)b=125;asd+=String.fromCharCode(b)}
+```
+
+flag = FLAG{ˡᐭꅭ곚삍䘐䣇눛뵼ᩎꓨᶐㆰ}
