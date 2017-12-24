@@ -247,4 +247,16 @@ flag = FLAG{jjang_easy}
 
 ## SPACE PROSPECTION 529pt (web)
 
+```
+2023년... SPACE PROSPECTION라는 회사가 화성에 진출했다.
+회사의 사이트에 들어가 핵심 기술을 가져오자!!
+```
 
+http://sdhsroot.kro.kr/BlackOut/.singlepost.html.swp 여기에 들어가면 핵심기술을 찾을수있다.
+
+flag = FLAG{FROM_2017_FLAG}
+
+## 
+
+```우
+```
