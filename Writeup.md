@@ -160,5 +160,55 @@ int __cdecl sub_468E80(int a1)
 ```
 flag = FLAG{Y0ur_p4t1enc3_1s_gr3at!}
 
+## EGG 863pt (rev)
+```
+게임을 하는데 캐릭터가 죽어버렸다
+어서 빨리 살려서 다시 게임을 하자
+hint : xor
+```
 
+이 함수에서 플래그를 뽑아낸다 입력값을 순서대로 sha(i+2)에서 뽑혀나온 키로 xor한뒤 f에있는 문자열과 비교한다.
+sha(i+2)에서 나오는 키들을 구한다음 f에다가 xor하면 플래그가 나온다.
 
+```c
+int ch(void)
+{
+  int result; // eax
+  __int64 v1; // [rsp+30h] [rbp-20h]
+  int i; // [rsp+3Ch] [rbp-14h]
+
+  LOWORD(v1) = 30839;
+  BYTE2(v1) = 121;
+  BYTE3(v1) = 122;
+  for ( i = 0; i < strlen(buf); ++i )
+    buf[i] ^= sha(i + 2);
+  if ( !strcmp(buf, f) )
+    result = printf(
+               "\n The egg hatches.",
+               f,
+               'HGFEDCBA',
+               'PONMLKJI',
+               'XWVUTSRQ',
+               'fedcbaZY',
+               'nmlkjihg',
+               'vutsrqpo',
+               v1);
+  else
+    result = init2();
+  return result;
+}
+```
+
+### solve.py
+```python
+enc="Mh;y;mR1@OijQhHW6Ah=hB"
+key=[0xc,6,0xa,0xf,0xa,0xc,0xd,2,7,8,7,3,7,1,9,8,5,0xf,1,0xb,5,3]
+
+flag=""
+
+for i in range(len(key)):
+    flag += chr(ord(enc[i]) ^ key[i])
+
+print "FLAG{%s}" %(flag)
+```
+flag = FLAG{An1v1a_3GGniViA_3Ni6mA}
