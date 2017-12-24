@@ -212,3 +212,39 @@ for i in range(len(key)):
 print "FLAG{%s}" %(flag)
 ```
 flag = FLAG{An1v1a_3GGniViA_3Ni6mA}
+
+## Login 50pt (web)
+```
+로그인 페이지인데 로그인이 안된다... 
+로그인을 성공하고 짱해커가 되어보자!!
+Hint : Array, length<6
+Hint2 : Get으로 배열을 전송하는 방법, sql injection
+```
+
+문제 소스를보면 쿠키에다가 base64로 인코딩돼있는 문자열을 집어넣는다.
+여러번 디코드하면 플래그가 나온다.
+
+```php
+<?php 
+include("dbcon.php"); 
+$pw=$_GET['pw']; 
+$fpw=$_GET['pw'][1]; 
+if(strlen($fpw)>5){ 
+    echo "<script>alert('no hack~');location.href='login.html'</script>"; 
+} 
+$query="select * from Login where pw='$fpw'"; 
+$info=mysqli_query($con,$query); 
+$result=mysqli_fetch_array($info); 
+if($result['id']){ 
+    setcookie("flag","VmxjeE1FNUdSbk5UV0hCclUwVmFiMWxzVm1GTlZtUnhVbFJXYVZKdGVGcFdSM0JYWWxaV1ZVMUVhejA9"); 
+    echo "<script>location.href='flag.html'</script>"; 
+} 
+highlight_file("login.php"); 
+?>
+```
+
+flag = FLAG{jjang_easy}
+
+## SPACE PROSPECTION 529pt (web)
+
+
