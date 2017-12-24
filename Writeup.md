@@ -256,7 +256,73 @@ http://sdhsroot.kro.kr/BlackOut/.singlepost.html.swp 여기에 들어가면 핵�
 
 flag = FLAG{FROM_2017_FLAG}
 
-## 
+## 보물찾기 149pt (web)
 
-```우
+```
+홈페이지 내에 존재하는 플레그를 찾아보세염!
+```
+갓크롬 개발자모드에서 sources로 찾았다.
+http://sdhsroot.kro.kr/vendor/bootstrap/css/bootstrap.min.css
+
+flag = FLAG{bootstrap_1s_jj4ng}
+
+## Phishing 600pt (web)
+
+```
+문제에 오류가 있을수도...
+Hint1 : 꺠진 문자열이 플레그일수도,,,
+```
+문제에 들어가면 바로 튕긴다.
+wget을 써서 index.php를 받고
+
+```php
+<script>
+alert("부적절한 접근입니다.");
+location.href="404";
+//asd.php
+</script>
+```
+
+asd.php를 받으면 js가 난독화되어있다;;
+
+난독화해제 개꿀 사이트인 http://jsbeautifier.org/ 에서 해제하면
+
+```js
+var b = 200;
+for (a = 0; a <= 20; a++) {
+    b = b + ((a * b) - (a / b));
+    if (a == 0) b = 70;
+    else if (a == 1) b = 76;
+    else if (a == 3) b = 71;
+    else if (a == 2) b = 65;
+    else if (a == 4) b = 123;
+    else if (a == 20) b = 125;
+    else if (a == 5) {
+        continue
+    } else if (a == 6) {
+        alert("코");
+        continue
+    } else if (a == 7) {
+        alert("드");
+        continue
+    } else if (a == 8) {
+        alert("속");
+        continue
+    } else if (a == 9) {
+        alert("에");
+        continue
+    } else if (a == 10) {
+        alert(".");
+        continue
+    } else if (a == 11) {
+        alert(".");
+        continue
+    } else if (a == 12) {
+        alert(".");
+        continue
+    } else if (a >= 4 && a <= 20) {
+        continue
+    }
+    alert(String.fromCharCode(b))
+}
 ```
