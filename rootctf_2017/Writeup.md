@@ -442,4 +442,14 @@ Learn a lot and get shell
 222.110.147.52:28417
 ```
 
+malloc 를 할당하고 해제할때
+```c
+++dword_20303C;
+        free(malloc_list[idx]);
+        if ( dword_203044 > 0 )
+          malloc_list[idx] = 0LL;
+        ++dword_203044;
+```
+
+
 
